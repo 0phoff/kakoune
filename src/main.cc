@@ -199,6 +199,19 @@ static const EnvVarDesc builtin_env_vars[] = { {
         [](StringView name, const Context& context) -> Vector<String>
         { return {context.buffer().name()}; }
     }, {
+        "buftype", false,
+        [](StringView name, const Context& context) -> Vector<String>
+        { 
+          auto flags = context.buffer().flags();
+          if (flags & Buffer::Flags::Fifo)
+            return {"fifo"};
+          if (flags & Buffer::Flags::Debug)
+            return {"debug"};
+          if (flags & (Buffer::Flags::File | Buffer::Flags::New))
+            return {"file"};
+          return {"scratch"};
+        }
+    }, {
         "buflist", false,
         [](StringView name, const Context& context) -> Vector<String>
         { return BufferManager::instance() | transform(&Buffer::display_name) | gather<Vector>(); }
@@ -223,6 +236,14 @@ static const EnvVarDesc builtin_env_vars[] = { {
         "selections", false,
         [](StringView name, const Context& context) -> Vector<String>
         { return context.selections_content(); }
+    }, {
+        "selection_index", false,
+        [](StringView name, const Context& context) -> Vector<String>
+        { return {format("{}", context.selections().main_index())}; }
+    }, {
+        "selection_count", false,
+        [](StringView name, const Context& context) -> Vector<String>
+        { return {format("{}", context.selections().size())}; }
     }, {
         "runtime", false,
         [](StringView name, const Context& context) -> Vector<String>
@@ -249,6 +270,21 @@ static const EnvVarDesc builtin_env_vars[] = { {
         { return RegisterManager::instance()[name.substr(4_byte)].get(context) |
                      gather<Vector<String>>(); }
     }, {
+        "recording_reg", false,
+        [](StringView name, const Context& context) -> Vector<String>
+        { auto reg = context.client().input_handler().recording_reg();
+          return {context.client().input_handler().is_recording() ? format("{}", reg) : ""}; }
+    }, {
+        "current_reg", false,
+        [](StringView name, const Context& context) -> Vector<String>
+        { auto reg = context.client().input_handler().mode_register();
+          return {format("{}", reg)}; }
+    }, {
+        "current_count", false,
+        [](StringView name, const Context& context) -> Vector<String>
+        { auto count = context.client().input_handler().mode_count();
+          return {format("{}", count)}; }
+    }, {
         "client_env_", true,
         [](StringView name, const Context& context) -> Vector<String>
         { return {context.client().get_env_var(name.substr(11_byte)).str()}; }
@@ -271,9 +307,32 @@ static const EnvVarDesc builtin_env_vars[] = { {
                       transform([](const std::unique_ptr<Client>& c) -> const String&
                                 { return c->context().name(); }) | gather<Vector>(); }
     }, {
+        "mode", false,
+        [](StringView name, const Context& context) -> Vector<String>
+        { auto mode = context.client().input_handler().mode_name();
+          if (prefix_match(mode, "user.")) {
+            return {mode.substr(5_byte).str()};
+          }
+          else {
+            return {mode.str()};
+          }
+        }
+    }, {
+        "new", false,
+        [](StringView name, const Context& context) -> Vector<String>
+        { return {context.buffer().flags() & Buffer::Flags::New ? "true" : "false"}; }
+    }, {
         "modified", false,
         [](StringView name, const Context& context) -> Vector<String>
         { return {context.buffer().is_modified() ? "true" : "false"}; }
+    }, {
+        "read_only", false,
+        [](StringView name, const Context& context) -> Vector<String>
+        { return {context.buffer().flags() & Buffer::Flags::ReadOnly ? "true" : "false"}; }
+    }, {
+        "hooks_enabled", false,
+        [](StringView name, const Context& context) -> Vector<String>
+        { return {context.hooks_disabled() ? "false" : "true"}; }
     }, {
         "cursor_line", false,
         [](StringView name, const Context& context) -> Vector<String>

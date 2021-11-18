@@ -107,6 +107,9 @@ public:
     const Context& context() const { return m_context; }
 
     DisplayLine mode_line() const;
+    StringView mode_name() const;
+    int mode_count() const;
+    char mode_register() const;
 
     std::pair<CursorMode, DisplayCoord> get_cursor_info() const;
 

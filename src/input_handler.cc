@@ -40,6 +40,8 @@ public:
     Context& context() const { return m_input_handler.context(); }
 
     virtual DisplayLine mode_line() const = 0;
+    virtual int param_count() const { return 0; }
+    virtual char param_register() const { return 0; }
 
     virtual KeymapMode keymap_mode() const = 0;
 
@@ -348,6 +350,9 @@ public:
         }
         return atoms;
     }
+
+    int param_count() const override { return m_params.count; }
+    char param_register() const override { return m_params.reg; }
 
     KeymapMode keymap_mode() const override { return KeymapMode::Normal; }
 
@@ -1672,7 +1677,7 @@ void InputHandler::menu(Vector<DisplayLine> choices, MenuCallback callback)
 void InputHandler::on_next_key(StringView mode_name, KeymapMode keymap_mode, KeyCallback callback,
                                Timer::Callback idle_callback)
 {
-    push_mode(new InputModes::NextKey(*this, format("next-key[{}]", mode_name), keymap_mode, std::move(callback),
+    push_mode(new InputModes::NextKey(*this, mode_name.str(), keymap_mode, std::move(callback),
                                       std::move(idle_callback)));
 }
 
@@ -1782,6 +1787,21 @@ void InputHandler::stop_recording()
 DisplayLine InputHandler::mode_line() const
 {
     return current_mode().mode_line();
+}
+
+StringView InputHandler::mode_name() const
+{
+    return current_mode().name();
+}
+
+int InputHandler::mode_count() const
+{
+    return current_mode().param_count();
+}
+
+char InputHandler::mode_register() const
+{
+    return current_mode().param_register();
 }
 
 std::pair<CursorMode, DisplayCoord> InputHandler::get_cursor_info() const
