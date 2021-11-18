@@ -35,6 +35,7 @@ public:
               const Face& padding_face) override;
 
     void draw_status(const DisplayLine& status_line,
+                     const DisplayLine& prompt_line,
                      const DisplayLine& mode_line,
                      const Face& default_face) override;
 

@@ -579,14 +579,19 @@ void TerminalUI::draw(const DisplayBuffer& display_buffer,
 }
 
 void TerminalUI::draw_status(const DisplayLine& status_line,
+                             const DisplayLine& prompt_line,
                              const DisplayLine& mode_line,
                              const Face& default_face)
 {
     const LineCount status_line_pos = m_status_on_top ? 0 : m_dimensions.line;
-    m_window.draw(status_line_pos, status_line.atoms(), default_face);
+
+    m_window.draw(status_line_pos, prompt_line.atoms(), default_face);
+    const auto prompt_len = prompt_line.length();
+
+    m_window.draw({status_line_pos, prompt_len}, status_line.atoms(), default_face);
 
     const auto mode_len = mode_line.length();
-    m_status_len = status_line.length();
+    m_status_len = status_line.length() + prompt_len;
     const auto remaining = m_dimensions.column - m_status_len;
     if (mode_len < remaining)
     {

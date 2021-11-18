@@ -618,6 +618,7 @@ void register_options()
                        UserInterface::Options{});
     reg.declare_option("modelinefmt", "format string used to generate the modeline",
                        "%val{bufname} %val{cursor_line}:%val{cursor_char_column} {{context_info}} {{mode_info}} - %val{client}@[%val{session}]"_str);
+    reg.declare_option("promptfmt", "format string used to generate the modeline prompt", ""_str);
 
     reg.declare_option("debug", "various debug flags", DebugFlags::None);
     reg.declare_option("readonly", "prevent buffers from being modified", false);
@@ -667,7 +668,7 @@ std::unique_ptr<UserInterface> make_ui(UIType ui_type)
         void info_hide() override {}
 
         void draw(const DisplayBuffer&, const Face&, const Face&) override {}
-        void draw_status(const DisplayLine&, const DisplayLine&, const Face&) override {}
+        void draw_status(const DisplayLine&, const DisplayLine&, const DisplayLine&, const Face&) override {}
         DisplayCoord dimensions() override { return {24,80}; }
         void set_cursor(CursorMode, DisplayCoord) override {}
         void refresh(bool) override {}

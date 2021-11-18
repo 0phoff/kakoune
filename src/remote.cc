@@ -398,6 +398,7 @@ public:
               const Face& padding_face) override;
 
     void draw_status(const DisplayLine& status_line,
+                     const DisplayLine& prompt_line,
                      const DisplayLine& mode_line,
                      const Face& default_face) override;
 
@@ -553,10 +554,11 @@ void RemoteUI::draw(const DisplayBuffer& display_buffer,
 }
 
 void RemoteUI::draw_status(const DisplayLine& status_line,
+                           const DisplayLine& prompt_line,
                            const DisplayLine& mode_line,
                            const Face& default_face)
 {
-    send_message(MessageType::DrawStatus, status_line, mode_line, default_face);
+    send_message(MessageType::DrawStatus, status_line, prompt_line, mode_line, default_face);
 }
 
 void RemoteUI::set_cursor(CursorMode mode, DisplayCoord coord)
@@ -712,9 +714,10 @@ RemoteClient::RemoteClient(StringView session, StringView name, std::unique_ptr<
             case MessageType::DrawStatus:
             {
                 auto status_line = reader.read<DisplayLine>();
+                auto prompt_line = reader.read<DisplayLine>();
                 auto mode_line = reader.read<DisplayLine>();
                 auto default_face = reader.read<Face>();
-                m_ui->draw_status(status_line, mode_line, default_face);
+                m_ui->draw_status(status_line, prompt_line, mode_line, default_face);
                 break;
             }
             case MessageType::SetCursor:

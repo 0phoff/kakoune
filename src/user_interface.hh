@@ -68,6 +68,7 @@ public:
                       const Face& padding_face) = 0;
 
     virtual void draw_status(const DisplayLine& status_line,
+                             const DisplayLine& prompt_line,
                              const DisplayLine& mode_line,
                              const Face& default_face) = 0;
 

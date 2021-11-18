@@ -80,7 +80,7 @@ private:
     void close_buffer_reload_dialog();
     void reload_buffer();
 
-    DisplayLine generate_mode_line() const;
+    std::pair<DisplayLine, DisplayLine> generate_mode_line() const;
 
     std::unique_ptr<UserInterface> m_ui;
     std::unique_ptr<Window> m_window;
@@ -95,6 +95,7 @@ private:
 
     DisplayLine m_status_line;
     DisplayLine m_mode_line;
+    DisplayLine m_prompt_line;
 
     enum PendingUI : int
     {

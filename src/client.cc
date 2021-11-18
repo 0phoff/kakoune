@@ -148,9 +148,24 @@ String generate_context_info(const Context& context)
     return s;
 }
 
-DisplayLine Client::generate_mode_line() const
+std::pair<DisplayLine, DisplayLine> Client::generate_mode_line() const
 {
-    DisplayLine modeline;
+    DisplayLine modeline, promptline;
+
+    try
+    {
+        const String& promptfmt = context().options()["promptfmt"].get<String>();
+        auto expanded = expand(promptfmt, context(), ShellContext{},
+                               [](String s) { return escape(s, '{', '\\'); });
+        promptline = parse_display_line(expanded, context().faces());
+    }
+    catch (runtime_error& err)
+    {
+        write_to_debug_buffer(format("Error while parsing promptfmt: {}", err.what()));
+        modeline.push_back({ "promptfmt error, see *debug* buffer", context().faces()["Error"] });
+        return {promptline, modeline};
+    }
+
     try
     {
         const String& modelinefmt = context().options()["modelinefmt"].get<String>();
@@ -167,7 +182,7 @@ DisplayLine Client::generate_mode_line() const
         modeline.push_back({ "modelinefmt error, see *debug* buffer", context().faces()["Error"] });
     }
 
-    return modeline;
+    return {promptline, modeline};
 }
 
 void Client::change_buffer(Buffer& buffer)
@@ -209,11 +224,16 @@ void Client::redraw_ifn()
     if (window.needs_redraw(context()))
         m_ui_pending |= Draw;
 
-    DisplayLine mode_line = generate_mode_line();
+    auto [prompt_line, mode_line] = generate_mode_line();
     if (mode_line.atoms() != m_mode_line.atoms())
     {
         m_ui_pending |= StatusLine;
         m_mode_line = std::move(mode_line);
+    }
+    if (prompt_line.atoms() != m_prompt_line.atoms())
+    {
+        m_ui_pending |= StatusLine;
+        m_prompt_line = std::move(prompt_line);
     }
 
     if (m_ui_pending == 0)
@@ -263,7 +283,7 @@ void Client::redraw_ifn()
         m_ui->info_hide();
 
     if (m_ui_pending & StatusLine)
-        m_ui->draw_status(m_status_line, m_mode_line, faces["StatusLine"]);
+        m_ui->draw_status(m_status_line, m_prompt_line, m_mode_line, faces["StatusLine"]);
 
     auto cursor = m_input_handler.get_cursor_info();
     m_ui->set_cursor(cursor.first, cursor.second);

@@ -26,7 +26,7 @@ Here are the requests that can be written by the json ui on stdout:
 * draw(Array<Line> lines, Face default_face, Face padding_face)
   padding_face is the face of the padding characters '~' in the
   terminal UI.
-* draw_status(Line status_line, Line mode_line,
+* draw_status(Line status_line, Line prompt_line, Line mode_line,
               Face default_face)
 * menu_show(Array<Line> items, Coord anchor, Face selected_item_face, Face menu_face,
             String style)
