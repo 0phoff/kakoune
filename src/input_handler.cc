@@ -1121,7 +1121,8 @@ private:
         if (not context().has_client())
             return;
 
-        auto width = context().client().dimensions().column - m_prompt.column_length();
+        auto promptwidth = context().client().current_prompt().length();
+        auto width = context().client().dimensions().column - m_prompt.column_length() - promptwidth;
         DisplayLine display_line;
         if (not (m_flags & PromptFlags::Password))
             display_line = m_line_editor.build_display_line(width);

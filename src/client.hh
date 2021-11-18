@@ -51,6 +51,7 @@ public:
 
     void print_status(DisplayLine status_line);
     const DisplayLine& current_status() const { return m_status_line; }
+    const DisplayLine& current_prompt() const { return m_prompt_line; }
 
     DisplayCoord dimensions() const;
 
